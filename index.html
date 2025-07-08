@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin" />
+    <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎨</text></svg>">
+    <title>Procesador de Imágenes</title>
+    <style>
+        :root {
+            --primary-color: #3b3b3b;
+            --light-gray: #f3f4f6;
+            --gray: #6b7280;
+            --dark-gray: #1f2937;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+            margin: 0;
+            padding: 2rem;
+            display: grid;
+            place-content: center;
+            min-height: 100vh;
+        }
+
+        main {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            max-width: 1000px;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--dark-gray);
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            color: var(--gray);
+            margin-bottom: 2rem;
+        }
+
+        code {
+            background-color: var(--light-gray);
+            padding: 0.2em 0.4em;
+            border-radius: 0.25rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .upload-button {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .upload-button:hover {
+            background-color: #777777;
+        }
+
+        .action-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s ease;
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .remove-bg-btn {
+            background-color: #555555;
+            color: white;
+        }
+
+        .remove-bg-btn:hover:not(:disabled) {
+            background-color: #3b3b3b;
+        }
+
+        .upscale-btn {
+            background-color: #3b3b3b;
+            color: white;
+        }
+
+        .upscale-btn:hover:not(:disabled) {
+            background-color: #3b3b3b;
+        }
+
+        .status-container {
+            margin-top: 1.5rem;
+            min-height: 40px;
+            font-weight: 500;
+            color: var(--gray);
+        }
+
+        #progress-info {
+            font-style: italic;
+        }
+
+        #loading-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border-left-color: var(--primary-color);
+            animation: spin 1s ease infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results-grid {
+            margin-top: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            text-align: left;
+        }
+
+        .image-container {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+
+        .image-container h2 {
+            text-align: center;
+            margin-top: 0;
+            font-size: 1.25rem;
+            color: var(--dark-gray);
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 0.25rem;
+        }
+
+        .result-bg {
+            background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), 
+                            linear-gradient(-45deg, #ccc 25%, transparent 25%), 
+                            linear-gradient(45deg, transparent 75%, #ccc 75%), 
+                            linear-gradient(-45deg, transparent 75%, #ccc 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            border-radius: 0.25rem;
+        }
+
+        .download-btn {
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            display: block;
+            width: 100%;
+        }
+
+        .download-btn:hover {
+            background-color: #3b3b3b;
+        }
+
+        .image-info {
+            font-size: 0.875rem;
+            color: var(--gray);
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Image Processor in the Browser</h1>
+        <p> This site is free from fascism and violence in art, but cannot be excluded from local attacks within a radius of wiffi <br> Everything you do with this site to serve you to create and grow as a human being in your knowledge you can sell the created or manipulated images here</p>
+        
+        <div class="controls">
+            <label for="image-input" class="upload-button">Seleccionar Imagen</label>
+            <input type="file" id="image-input" accept="image/*" hidden>
+            
+            <button id="remove-bg-btn" class="action-btn remove-bg-btn" disabled>
+                Eliminar Fondo
+            </button>
+            
+            <button id="upscale-btn" class="action-btn upscale-btn" disabled>
+                Aumentar Resolución
+            </button>
+            
+            <select id="scale-factor" class="action-btn" style="background-color: #6b7280; color: white;">
+                <option value="2">2x (Recomendado)</option>
+                <option value="3">3x</option>
+                <option value="4">4x</option>
+            </select>
+        </div>
+        
+        <div id="status" class="status-container">
+            <div id="loading-indicator" class="hidden">
+                <div class="spinner"></div>
+                <span>Processing... Please wait</span>
+            </div>
+            <div id="progress-info">Select an image to start</div>
+        </div>
+        
+        <div id="results" class="results-grid hidden">
+        </div>
+    </main>
+
+    <script type="module">
+      
+      
+
+      import { removeBackground } from 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.6.0/+esm';
+import Upscaler from 'https://cdn.jsdelivr.net/npm/upscaler@1.0.0-beta.19/+esm';
+
+const imageInput = document.getElementById('image-input');
+const removeBgBtn = document.getElementById('remove-bg-btn');
+const upscaleBtn = document.getElementById('upscale-btn');
+const scaleFactor = document.getElementById('scale-factor');
+const loadingIndicator = document.getElementById('loading-indicator');
+const progressInfo = document.getElementById('progress-info');
+const resultsContainer = document.getElementById('results');
+
+let currentFile = null;
+let currentImages = {};
+let upscaler = null;
+
+async function initUpscaler() {
+    try {
+        upscaler = new Upscaler();
+    } catch (error) {
+        console.error('Error al inicializar upscaler:', error);
+    }
+}
+
+initUpscaler();
+
+imageInput.addEventListener('change', handleImageUpload);
+removeBgBtn.addEventListener('click', removeBackgroundAction);
+upscaleBtn.addEventListener('click', upscaleImageAction);
+
+function handleImageUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    currentFile = file;
+    currentImages = {};
+    removeBgBtn.disabled = false;
+    upscaleBtn.disabled = false;
+    
+    displayOriginalImage(file);
+    progressInfo.textContent = 'Imagen cargada. Selecciona una acción.';
+}
+
+function displayOriginalImage(file) {
+    const url = URL.createObjectURL(file);
+    currentImages.original = url;
+    
+    const img = new Image();
+    img.onload = function() {
+        resultsContainer.innerHTML = '';
+        resultsContainer.classList.remove('hidden');
+        
+        const card = createImageCard('Original', url, `${this.width} x ${this.height} px`);
+        resultsContainer.appendChild(card);
+    };
+    img.src = url;
+}
+
+function createImageCard(title, imageUrl, info = '', downloadName = null) {
+    const card = document.createElement('div');
+    card.className = 'image-container';
+    
+    const bgClass = title.includes('Sin Fondo') ? 'result-bg' : '';
+    card.innerHTML = `
+        <h2>${title}</h2>
+        <div class="${bgClass}">
+            <img src="${imageUrl}" alt="${title}">
+        </div>
+        <div class="image-info">${info}</div>
+        ${downloadName ? `<button class="download-btn" onclick="downloadImage('${imageUrl}', '${downloadName}')">Descargar</button>` : ''}
+    `;
+    
+    return card;
+}
+
+window.downloadImage = function(url, filename) {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
+
+async function removeBackgroundAction() {
+    if (!currentFile) return;
+    
+    loadingIndicator.classList.remove('hidden');
+    progressInfo.textContent = 'Delete background...';
+    removeBgBtn.disabled = true;
+    
+    try {
+        const blob = await removeBackground(currentFile, {
+            progress: (key, current, total) => {
+                const percentage = Math.round((current / total) * 100);
+                progressInfo.textContent = `Download${key}: ${percentage}%`;
+            }
+        });
+        
+        const url = URL.createObjectURL(blob);
+        currentImages.noBackground = url;
+        
+        const card = createImageCard('Sin Fondo', url, 'background delete ', 'imagen_sin_fondo.png');
+        resultsContainer.appendChild(card);
+        
+        progressInfo.textContent = 'Fund successfully removed';
+    } catch (error) {
+        console.error('Error al eliminar fondo:', error);
+        progressInfo.textContent = 'Error removing background';
+    } finally {
+        loadingIndicator.classList.add('hidden');
+        removeBgBtn.disabled = false;
+    }
+}
+
+async function upscaleImageAction() {
+    if (!currentFile) return;
+    
+    const scale = parseInt(scaleFactor.value);
+    const img = new Image();
+    
+    img.onload = async function() {
+        const maxDimension = Math.max(this.width, this.height);
+        const projectedSize = maxDimension * scale;
+        
+        if (projectedSize > 4096) {
+            const maxScale = Math.floor(4096 / maxDimension);
+            if (maxScale < 2) {
+                progressInfo.textContent = 'Imagen demasiado grande. Máximo permitido: 2048x2048px';
+                return;
+            }
+            progressInfo.textContent = `Escala reducida a ${maxScale}x para evitar límites de WebGL`;
+            scaleFactor.value = maxScale.toString();
+        }
+        
+        loadingIndicator.classList.remove('hidden');
+        progressInfo.textContent = 'Aumentando resolución...';
+        upscaleBtn.disabled = true;
+        
+        try {
+            if (!upscaler) {
+                progressInfo.textContent = 'Inicializando modelo...';
+                await initUpscaler();
+            }
+            
+            const result = await upscaler.upscale(img, {
+                patchSize: 64,
+                padding: 2
+            });
+            
+            let canvas;
+            let url;
+            
+            if (result instanceof HTMLCanvasElement) {
+                canvas = result;
+                url = canvas.toDataURL();
+            } else if (result && typeof result === 'object' && result.data) {
+                canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = this.width * scale;
+                canvas.height = this.height * scale;
+                
+                const imageData = ctx.createImageData(canvas.width, canvas.height);
+                imageData.data.set(result.data);
+                ctx.putImageData(imageData, 0, 0);
+                
+                url = canvas.toDataURL();
+            } else if (result instanceof ImageData) {
+                canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = result.width;
+                canvas.height = result.height;
+                ctx.putImageData(result, 0, 0);
+                
+                url = canvas.toDataURL();
+            } else {
+                canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = this.width * scale;
+                canvas.height = this.height * scale;
+                ctx.drawImage(this, 0, 0, canvas.width, canvas.height);
+                
+                url = canvas.toDataURL();
+            }
+            
+            currentImages.upscaled = url;
+            
+            const originalSize = `${this.width} x ${this.height} px`;
+            const newSize = `${canvas.width} x ${canvas.height} px`;
+            
+            const card = createImageCard(
+                'Resolución Aumentada',
+                url,
+                `${originalSize} → ${newSize}`,
+                'imagen_upscaled.png'
+            );
+            resultsContainer.appendChild(card);
+            
+            progressInfo.textContent = 'Resolución aumentada exitosamente';
+        } catch (error) {
+            console.error('Error en upscaling:', error);
+            if (error.message.includes('texture size') || error.message.includes('WebGL maximum')) {
+                progressInfo.textContent = 'Imagen demasiado grande para el GPU. Intenta con escala menor.';
+            } else {
+                progressInfo.textContent = 'Error al aumentar resolución';
+            }
+        } finally {
+            loadingIndicator.classList.add('hidden');
+            upscaleBtn.disabled = false;
+        }
+    };
+    
+    img.src = URL.createObjectURL(currentFile);
+}
+
+window.addEventListener('beforeunload', () => {
+    Object.values(currentImages).forEach(url => {
+        if (url.startsWith('blob:')) {
+            URL.revokeObjectURL(url);
+        }
+    });
+});
+
+
+      
+    </script>
+</body>
+</html>
