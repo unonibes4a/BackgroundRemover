@@ -5,241 +5,363 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin" />
     <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp" />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎨</text></svg>">
+ 
     <title>Procesador de Imágenes</title>
-    <style>
-        :root {
-            --primary-color: #3b3b3b;
-            --light-gray: #f3f4f6;
-            --gray: #6b7280;
-            --dark-gray: #1f2937;
-        }
+    <style> 
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--light-gray);
-            color: var(--dark-gray);
-            margin: 0;
-            padding: 2rem;
-            display: grid;
-            place-content: center;
-            min-height: 100vh;
-        }
+    :root {
+    --primary-color: #4b4b4b;
+    --secondary-gray: #6b7280;
+    --light-gray: #ffffff;
+    --gray: #6b7280;
+    --dark-gray: #1f2937;
+    --success-color: #658379;
+    --warning-color: #f59e0b;
+    --error-color: #ecc4c4;
+    --purple-color: #505050;
+    --cyan-color: #b7d2d6;
+}
 
-        main {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 1rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            max-width: 1000px;
-            text-align: center;
-        }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #ffffff;
+    color: var(--dark-gray);
+    margin: 0;
+    padding: 2rem;
+    display: grid;
+    place-content: center;
+    min-height: 100vh;
+}
 
-        h1 {
-            color: var(--dark-gray);
-            margin-bottom: 0.5rem;
-        }
+main {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    max-width: 1200px;
+    text-align: center;
+}
 
-        p {
-            color: var(--gray);
-            margin-bottom: 2rem;
-        }
+h1 {
+    color: var(--dark-gray);
+    margin-bottom: 0.5rem;
+}
 
-        code {
-            background-color: var(--light-gray);
-            padding: 0.2em 0.4em;
-            border-radius: 0.25rem;
-        }
+p {
+    color: var(--gray);
+    margin-bottom: 2rem;
+}
 
-        .controls {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
+.controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
 
-        .upload-button {
-            display: inline-block;
-            padding: 0.75rem 1.5rem;
-            background-color: var(--primary-color);
-            color: white;
-            font-weight: bold;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
+.upload-button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: bold;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    border: none;
+}
 
-        .upload-button:hover {
-            background-color: #777777;
-        }
+.upload-button:hover {
+    background-color: var(--dark-gray);
+}
 
-        .action-btn {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.2s ease;
-        }
+.action-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+    background-color: var(--secondary-gray);
+    color: white;
+}
 
-        .action-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+.action-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
 
-        .remove-bg-btn {
-            background-color: #555555;
-            color: white;
-        }
+.action-btn:hover:not(:disabled) {
+    background-color: var(--primary-color);
+}
 
-        .remove-bg-btn:hover:not(:disabled) {
-            background-color: #3b3b3b;
-        }
+#scale-factor {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+}
 
-        .upscale-btn {
-            background-color: #3b3b3b;
-            color: white;
-        }
+.drop-zone {
+    border: 2px dashed var(--gray);
+    border-radius: 0.5rem;
+    padding: 3rem;
+    margin: 2rem 0;
+    background-color: var(--light-gray);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
 
-        .upscale-btn:hover:not(:disabled) {
-            background-color: #3b3b3b;
-        }
+.drop-zone:hover {
+    border-color: var(--primary-color);
+    background-color: #f0f9ff;
+}
 
-        .status-container {
-            margin-top: 1.5rem;
-            min-height: 40px;
-            font-weight: 500;
-            color: var(--gray);
-        }
+.drop-zone.drag-over {
+    border-color: var(--primary-color);
+    background-color: #dbeafe;
+    transform: scale(1.02);
+}
 
-        #progress-info {
-            font-style: italic;
-        }
+.drop-zone-text {
+    color: var(--gray);
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
+}
 
-        #loading-indicator {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 0.5rem;
-        }
+.drop-zone-subtext {
+    color: var(--gray);
+    font-size: 0.875rem;
+}
 
-        .spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            border-left-color: var(--primary-color);
-            animation: spin 1s ease infinite;
-        }
+.status-container {
+    margin-top: 1.5rem;
+    min-height: 40px;
+    font-weight: 500;
+    color: var(--gray);
+}
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+#progress-info {
+    font-style: italic;
+}
 
-        .results-grid {
-            margin-top: 2rem;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            text-align: left;
-        }
+#loading-indicator {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+}
 
-        .image-container {
-            border: 1px solid #e5e7eb;
-            border-radius: 0.5rem;
-            padding: 1rem;
-        }
+.spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border-left-color: var(--primary-color);
+    animation: spin 1s ease infinite;
+}
 
-        .image-container h2 {
-            text-align: center;
-            margin-top: 0;
-            font-size: 1.25rem;
-            color: var(--dark-gray);
-        }
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
 
-        img {
-            max-width: 100%;
-            height: auto;
-            display: block;
-            border-radius: 0.25rem;
-        }
+.results-grid {
+    margin-top: 2rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    text-align: left;
+}
 
-        .result-bg {
-            background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), 
-                            linear-gradient(-45deg, #ccc 25%, transparent 25%), 
-                            linear-gradient(45deg, transparent 75%, #ccc 75%), 
-                            linear-gradient(-45deg, transparent 75%, #ccc 75%);
-            background-size: 20px 20px;
-            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
-            border-radius: 0.25rem;
-        }
+.image-container {
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
 
-        .download-btn {
-            margin-top: 1rem;
-            padding: 0.5rem 1rem;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 0.25rem;
-            cursor: pointer;
-            font-size: 0.875rem;
-            display: block;
-            width: 100%;
-        }
+.image-container h2 {
+    text-align: center;
+    margin-top: 0;
+    font-size: 1.25rem;
+    color: var(--dark-gray);
+}
 
-        .download-btn:hover {
-            background-color: #3b3b3b;
-        }
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 0.25rem;
+}
 
-        .image-info {
-            font-size: 0.875rem;
-            color: var(--gray);
-            margin-top: 0.5rem;
-            text-align: center;
-        }
+video {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 0.25rem;
+}
 
-        .hidden {
-            display: none !important;
-        }
+.result-bg {
+    background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    border-radius: 0.25rem;
+}
 
-        @media (max-width: 768px) {
-            .controls {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .results-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+.download-btn {
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    display: block;
+    width: 100%;
+    transition: background-color 0.2s ease;
+}
+
+.download-btn:hover {
+    background-color: var(--dark-gray);
+}
+
+.image-info {
+    font-size: 0.875rem;
+    color: var(--gray);
+    margin-top: 0.5rem;
+    text-align: center;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.frames-preview {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.frame-item {
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+.frame-item img {
+    width: 100%;
+    height: auto;
+    border-radius: 3px;
+}
+
+.frame-number {
+    font-size: 12px;
+    color: var(--gray);
+    margin-top: 5px;
+}
+
+.more-frames {
+    padding: 20px;
+    color: var(--gray);
+    text-align: center;
+    grid-column: 1 / -1;
+}
+
+.folder-controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.folder-input {
+    padding: 0.5rem;
+    border: 1px solid var(--gray);
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    width: 200px;
+}
+
+@media (max-width: 768px) {
+    .controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .folder-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .folder-input {
+        width: 100%;
+    }
+    
+    .results-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .drop-zone {
+        padding: 2rem;
+    }
+}
     </style>
 </head>
 <body>
     <main>
         <h1>Image Processor in the Browser</h1>
-        <p> This site is free from fascism and violence in art, but cannot be excluded from local attacks within a radius of wiffi <br> Everything you do with this site to serve you to create and grow as a human being in your knowledge you can sell the created or manipulated images here</p>
-        
+        <p>This site is free from fascism and violence in art, but cannot be excluded from local attacks within a radius of wiffi <br> Everything you do with this site to serve you to create and grow as a human being in your knowledge you can sell the created or manipulated images here</p>
+
+        <div id="drop-zone" class="drop-zone">
+            <div class="drop-zone-text">Drop images or videos here</div>
+            <div class="drop-zone-subtext">or use the buttons below</div>
+        </div>
+
         <div class="controls">
-            <label for="image-input" class="upload-button">Seleccionar Imagen</label>
+            <label for="image-input" class="upload-button">Select Image</label>
             <input type="file" id="image-input" accept="image/*" hidden>
             
-            <button id="remove-bg-btn" class="action-btn remove-bg-btn" disabled>
-                Eliminar Fondo
-            </button>
+            <label for="video-input" class="upload-button" style="background-color: #464646;">Select Video</label>
+            <input type="file" id="video-input" accept="video/*" hidden>
             
-            <button id="upscale-btn" class="action-btn upscale-btn" disabled>
-                Aumentar Resolución
-            </button>
+            <label for="folder-input" class="upload-button folder-btn">Select Folder</label>
+            <input type="file" id="folder-input" webkitdirectory directory hidden>
+            
+            <button id="paste-btn" class="action-btn paste-btn">Paste from Clipboard</button>
+            
+            <button id="remove-bg-btn" class="action-btn remove-bg-btn" disabled>Remove Background</button>
+            
+            <button id="upscale-btn" class="action-btn upscale-btn" disabled>Upscale Image</button>
+            
+            <button id="process-video-btn" class="action-btn process-video-btn" disabled>Process Video</button>
+            
+            <button id="download-zip-btn" class="action-btn download-zip-btn" disabled>Download ZIP</button>
             
             <select id="scale-factor" class="action-btn" style="background-color: #6b7280; color: white;">
-                <option value="2">2x (Recomendado)</option>
+                <option value="2">2x (Recommended)</option>
                 <option value="3">3x</option>
                 <option value="4">4x</option>
             </select>
         </div>
-        
+
+        <div class="folder-controls">
+            <input type="text" id="folder-bg-name" class="folder-input" placeholder="Base name for files" value="image_bg">
+            <button id="folder-remove-bg-btn" class="action-btn remove-bg-btn" disabled>Process Folder (Remove BG)</button>
+            
+            <input type="text" id="folder-upscale-name" class="folder-input" placeholder="Base name for files" value="image_upscaled">
+            <button id="folder-upscale-btn" class="action-btn upscale-btn" disabled>Process Folder (Upscale)</button>
+        </div>
+
         <div id="status" class="status-container">
             <div id="loading-indicator" class="hidden">
                 <div class="spinner"></div>
@@ -247,86 +369,523 @@
             </div>
             <div id="progress-info">Select an image to start</div>
         </div>
-        
-        <div id="results" class="results-grid hidden">
-        </div>
+
+        <div id="results" class="results-grid hidden"></div>
     </main>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script type="module">
-      
-      
-
-      import { removeBackground } from 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.6.0/+esm';
+    import { removeBackground } from 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.6.0/+esm';
 import Upscaler from 'https://cdn.jsdelivr.net/npm/upscaler@1.0.0-beta.19/+esm';
 
 const imageInput = document.getElementById('image-input');
+const videoInput = document.getElementById('video-input');
+const folderInput = document.getElementById('folder-input');
 const removeBgBtn = document.getElementById('remove-bg-btn');
 const upscaleBtn = document.getElementById('upscale-btn');
+const processVideoBtn = document.getElementById('process-video-btn');
+const pasteBtn = document.getElementById('paste-btn');
+const downloadZipBtn = document.getElementById('download-zip-btn');
 const scaleFactor = document.getElementById('scale-factor');
 const loadingIndicator = document.getElementById('loading-indicator');
 const progressInfo = document.getElementById('progress-info');
 const resultsContainer = document.getElementById('results');
+const dropZone = document.getElementById('drop-zone');
+
+const folderBgNameInput = document.getElementById('folder-bg-name');
+const folderUpscaleNameInput = document.getElementById('folder-upscale-name');
+const folderRemoveBgBtn = document.getElementById('folder-remove-bg-btn');
+const folderUpscaleBtn = document.getElementById('folder-upscale-btn');
 
 let currentFile = null;
 let currentImages = {};
 let upscaler = null;
+let videoFrames = [];
+let processedFrames = [];
+let folderFiles = [];
+let processedFolderFiles = [];
+let processingQueue = [];
+let isProcessing = false;
 
 async function initUpscaler() {
     try {
         upscaler = new Upscaler();
+        await upscaler.warmup();
     } catch (error) {
-        console.error('Error al inicializar upscaler:', error);
+        console.error('Error initializing upscaler:', error);
+        upscaler = null;
+    }
+}
+
+async function cleanupMemory() {
+    if (window.tf) {
+        try {
+            const numTensors = window.tf.memory().numTensors;
+            if (numTensors > 100) {
+                window.tf.disposeVariables();
+                await window.tf.nextFrame();
+                await window.tf.nextFrame();
+            }
+        } catch (error) {
+            console.error('TensorFlow cleanup error:', error);
+        }
+    }
+    
+    if (window.gc) {
+        try {
+            window.gc();
+        } catch (error) {
+            console.error('GC error:', error);
+        }
+    }
+    
+    await new Promise(resolve => setTimeout(resolve, 100));
+}
+
+function downloadDataURL(dataURL, filename) {
+    const link = document.createElement('a');
+    link.href = dataURL;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+async function safeUpscale(img, options = {}) {
+    const maxRetries = 3;
+    let retryCount = 0;
+    
+    while (retryCount < maxRetries) {
+        try {
+            await cleanupMemory();
+            
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            const scale = parseInt(scaleFactor.value) || 2;
+            const maxDimension = Math.max(img.width, img.height);
+            const projectedSize = maxDimension * scale;
+            
+            if (projectedSize > 2048 || !upscaler) {
+                const finalScale = Math.min(scale, Math.floor(2048 / maxDimension));
+                canvas.width = img.width * finalScale;
+                canvas.height = img.height * finalScale;
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                return canvas;
+            }
+            
+            const result = await upscaler.upscale(img, {
+                patchSize: 64,
+                padding: 2,
+                ...options
+            });
+            
+            if (result instanceof HTMLCanvasElement) {
+                return result;
+            } else if (result instanceof ImageData) {
+                canvas.width = result.width;
+                canvas.height = result.height;
+                ctx.putImageData(result, 0, 0);
+                return canvas;
+            } else {
+                canvas.width = img.width * scale;
+                canvas.height = img.height * scale;
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                return canvas;
+            }
+            
+        } catch (error) {
+            retryCount++;
+            console.error(`Upscale attempt ${retryCount} failed:`, error);
+            
+            if (retryCount >= maxRetries) {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const scale = parseInt(scaleFactor.value) || 2;
+                canvas.width = img.width * scale;
+                canvas.height = img.height * scale;
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                return canvas;
+            }
+            
+            await cleanupMemory();
+            await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+        }
     }
 }
 
 initUpscaler();
 
 imageInput.addEventListener('change', handleImageUpload);
+videoInput.addEventListener('change', handleVideoUpload);
+folderInput.addEventListener('change', handleFolderUpload);
 removeBgBtn.addEventListener('click', removeBackgroundAction);
 upscaleBtn.addEventListener('click', upscaleImageAction);
+processVideoBtn.addEventListener('click', processVideoFrames);
+pasteBtn.addEventListener('click', pasteFromClipboard);
+downloadZipBtn.addEventListener('click', downloadAsZip);
+folderRemoveBgBtn.addEventListener('click', processFolderRemoveBackground);
+folderUpscaleBtn.addEventListener('click', processFolderUpscale);
+
+dropZone.addEventListener('dragover', handleDragOver);
+dropZone.addEventListener('drop', handleDrop);
+dropZone.addEventListener('dragleave', handleDragLeave);
+
+function handleDragOver(e) {
+    e.preventDefault();
+    dropZone.classList.add('drag-over');
+}
+
+function handleDragLeave(e) {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+}
+
+function handleDrop(e) {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        const file = files[0];
+        if (file.type.startsWith('image/')) {
+            handleFileUpload(file);
+        } else if (file.type.startsWith('video/')) {
+            handleVideoFile(file);
+        }
+    }
+}
+
+function handleFolderUpload(event) {
+    const files = Array.from(event.target.files);
+    folderFiles = files.filter(file => file.type.startsWith('image/'));
+    
+    if (folderFiles.length === 0) {
+        progressInfo.textContent = 'No images found in folder';
+        return;
+    }
+
+    folderRemoveBgBtn.disabled = false;
+    folderUpscaleBtn.disabled = false;
+    progressInfo.textContent = `${folderFiles.length} images loaded from folder`;
+    
+    displayFolderPreview();
+}
+
+function displayFolderPreview() {
+    resultsContainer.innerHTML = '';
+    resultsContainer.classList.remove('hidden');
+    
+    const header = document.createElement('div');
+    header.className = 'image-container';
+    header.innerHTML = `
+        <h2>Folder Preview (${folderFiles.length} images)</h2>
+        <div class="image-info">Ready to process</div>
+    `;
+    resultsContainer.appendChild(header);
+
+    const grid = document.createElement('div');
+    grid.className = 'frames-preview';
+    
+    folderFiles.slice(0, 20).forEach((file, index) => {
+        const frameElement = document.createElement('div');
+        frameElement.className = 'frame-item';
+        const url = URL.createObjectURL(file);
+        frameElement.innerHTML = `
+            <img src="${url}" alt="${file.name}">
+            <div class="frame-number">${file.name}</div>
+        `;
+        grid.appendChild(frameElement);
+    });
+
+    if (folderFiles.length > 20) {
+        const moreInfo = document.createElement('div');
+        moreInfo.className = 'more-frames';
+        moreInfo.textContent = `... and ${folderFiles.length - 20} more images`;
+        grid.appendChild(moreInfo);
+    }
+
+    resultsContainer.appendChild(grid);
+}
+
+async function processFolderRemoveBackground() {
+    if (folderFiles.length === 0 || isProcessing) return;
+
+    const baseName = folderBgNameInput.value.trim() || 'image_bg';
+    
+    isProcessing = true;
+    loadingIndicator.classList.remove('hidden');
+    folderRemoveBgBtn.disabled = true;
+    folderUpscaleBtn.disabled = true;
+    processedFolderFiles = [];
+
+    try {
+        for (let i = 0; i < folderFiles.length; i++) {
+            const file = folderFiles[i];
+            progressInfo.textContent = `Processing ${i + 1} of ${folderFiles.length}: ${file.name}`;
+            
+            const processedBlob = await removeBackground(file);
+            const processedUrl = URL.createObjectURL(processedBlob);
+            
+            processedFolderFiles.push({
+                url: processedUrl,
+                name: `${baseName}_${String(i + 1).padStart(4, '0')}.png`
+            });
+            
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+
+        displayProcessedFolderFiles('Background Removed');
+        downloadZipBtn.disabled = false;
+        progressInfo.textContent = `${processedFolderFiles.length} images processed successfully`;
+        
+    } catch (error) {
+        console.error('Error processing folder:', error);
+        progressInfo.textContent = 'Error processing folder';
+    } finally {
+        isProcessing = false;
+        loadingIndicator.classList.add('hidden');
+        folderRemoveBgBtn.disabled = false;
+        folderUpscaleBtn.disabled = false;
+    }
+}
+
+async function processFolderUpscale() {
+    if (folderFiles.length === 0 || isProcessing) return;
+
+    const baseName = folderUpscaleNameInput.value.trim() || 'image_upscaled';
+    const scale = parseInt(scaleFactor.value) || 2;
+    
+    isProcessing = true;
+    loadingIndicator.classList.remove('hidden');
+    folderUpscaleBtn.disabled = true;
+    folderRemoveBgBtn.disabled = true;
+    processedFolderFiles = [];
+
+    try {
+        if (!upscaler) {
+            progressInfo.textContent = 'Initializing upscaler...';
+            await initUpscaler();
+        }
+
+        for (let i = 0; i < folderFiles.length; i++) {
+            const file = folderFiles[i];
+            progressInfo.textContent = `Processing ${i + 1} of ${folderFiles.length}: ${file.name}`;
+            
+            const filename = `${baseName}_${String(i + 1).padStart(4, '0')}.png`;
+            
+            try {
+                const success = await processOneImageUpscaleSequential(file, filename, scale);
+                
+                if (success) {
+                    processedFolderFiles.push({
+                        url: null,
+                        name: filename
+                    });
+                    progressInfo.textContent = `Downloaded ${i + 1} of ${folderFiles.length}: ${filename}`;
+                } else {
+                    progressInfo.textContent = `Failed to process ${i + 1} of ${folderFiles.length}: ${file.name}`;
+                }
+            } catch (error) {
+                console.error(`Error processing ${file.name}:`, error);
+                progressInfo.textContent = `Error processing ${i + 1} of ${folderFiles.length}: ${file.name}`;
+            }
+            
+            await cleanupMemory();
+            
+            if (i < folderFiles.length - 1) {
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+        }
+
+        progressInfo.textContent = `${processedFolderFiles.length} images processed successfully`;
+        
+    } catch (error) {
+        console.error('Error upscaling folder:', error);
+        progressInfo.textContent = `Error upscaling folder: ${error.message}`;
+    } finally {
+        isProcessing = false;
+        loadingIndicator.classList.add('hidden');
+        folderUpscaleBtn.disabled = false;
+        folderRemoveBgBtn.disabled = false;
+    }
+}
+
+async function processOneImageUpscaleSequential(file, filename, scale) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        const imageUrl = URL.createObjectURL(file);
+        
+        img.onload = async function() {
+            try {
+                const canvas = await safeUpscale(img, {
+                    patchSize: 32,
+                    padding: 1
+                });
+                
+                const dataURL = canvas.toDataURL('image/png');
+                downloadDataURL(dataURL, filename);
+                
+                URL.revokeObjectURL(imageUrl);
+                resolve(true);
+                
+            } catch (error) {
+                console.error('Error processing image:', error);
+                URL.revokeObjectURL(imageUrl);
+                resolve(false);
+            }
+        };
+        
+        img.onerror = () => {
+            URL.revokeObjectURL(imageUrl);
+            resolve(false);
+        };
+        
+        img.src = imageUrl;
+    });
+}
+
+function displayProcessedFolderFiles(processType) {
+    resultsContainer.innerHTML = '';
+    
+    const header = document.createElement('div');
+    header.className = 'image-container';
+    header.innerHTML = `
+        <h2>${processType} Files (${processedFolderFiles.length})</h2>
+        <div class="image-info">Processing completed</div>
+    `;
+    resultsContainer.appendChild(header);
+
+    const grid = document.createElement('div');
+    grid.className = 'frames-preview';
+    
+    processedFolderFiles.slice(0, 20).forEach((file, index) => {
+        const frameElement = document.createElement('div');
+        frameElement.className = 'frame-item result-bg';
+        if (file.url) {
+            frameElement.innerHTML = `
+                <img src="${file.url}" alt="${file.name}">
+                <div class="frame-number">${file.name}</div>
+            `;
+        } else {
+            frameElement.innerHTML = `
+                <div class="frame-placeholder">✓ Downloaded</div>
+                <div class="frame-number">${file.name}</div>
+            `;
+        }
+        grid.appendChild(frameElement);
+    });
+
+    if (processedFolderFiles.length > 20) {
+        const moreInfo = document.createElement('div');
+        moreInfo.className = 'more-frames';
+        moreInfo.textContent = `... and ${processedFolderFiles.length - 20} more files`;
+        grid.appendChild(moreInfo);
+    }
+
+    resultsContainer.appendChild(grid);
+}
+
+async function pasteFromClipboard() {
+    try {
+        const clipboardItems = await navigator.clipboard.read();
+        for (const clipboardItem of clipboardItems) {
+            for (const type of clipboardItem.types) {
+                if (type.startsWith('image/')) {
+                    const blob = await clipboardItem.getType(type);
+                    handleFileUpload(blob);
+                    return;
+                }
+            }
+        }
+        progressInfo.textContent = 'No image found in clipboard';
+    } catch (error) {
+        console.error('Error accessing clipboard:', error);
+        progressInfo.textContent = 'Error accessing clipboard';
+    }
+}
 
 function handleImageUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
-    
+    handleFileUpload(file);
+}
+
+function handleVideoUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    handleVideoFile(file);
+}
+
+function handleFileUpload(file) {
     currentFile = file;
     currentImages = {};
     removeBgBtn.disabled = false;
     upscaleBtn.disabled = false;
-    
+    processVideoBtn.disabled = true;
+    downloadZipBtn.disabled = true;
     displayOriginalImage(file);
-    progressInfo.textContent = 'Imagen cargada. Selecciona una acción.';
+    progressInfo.textContent = 'Image loaded. Select an action.';
+}
+
+function handleVideoFile(file) {
+    currentFile = file;
+    videoFrames = [];
+    processedFrames = [];
+    removeBgBtn.disabled = true;
+    upscaleBtn.disabled = true;
+    processVideoBtn.disabled = false;
+    downloadZipBtn.disabled = true;
+    displayVideoPreview(file);
+    progressInfo.textContent = 'Video loaded. Click "Process Video" to extract frames.';
 }
 
 function displayOriginalImage(file) {
     const url = URL.createObjectURL(file);
     currentImages.original = url;
-    
     const img = new Image();
     img.onload = function() {
         resultsContainer.innerHTML = '';
         resultsContainer.classList.remove('hidden');
-        
         const card = createImageCard('Original', url, `${this.width} x ${this.height} px`);
         resultsContainer.appendChild(card);
     };
     img.src = url;
 }
 
+function displayVideoPreview(file) {
+    const url = URL.createObjectURL(file);
+    resultsContainer.innerHTML = '';
+    resultsContainer.classList.remove('hidden');
+    const card = document.createElement('div');
+    card.className = 'image-container';
+    card.innerHTML = `
+        <h2>Video Preview</h2>
+        <video controls style="max-width: 100%; height: auto;">
+            <source src="${url}" type="${file.type}">
+        </video>
+        <div class="image-info">File: ${file.name}</div>
+    `;
+    resultsContainer.appendChild(card);
+}
+
 function createImageCard(title, imageUrl, info = '', downloadName = null) {
     const card = document.createElement('div');
     card.className = 'image-container';
-    
-    const bgClass = title.includes('Sin Fondo') ? 'result-bg' : '';
+    const bgClass = title.includes('Background') ? 'result-bg' : '';
     card.innerHTML = `
         <h2>${title}</h2>
         <div class="${bgClass}">
             <img src="${imageUrl}" alt="${title}">
         </div>
         <div class="image-info">${info}</div>
-        ${downloadName ? `<button class="download-btn" onclick="downloadImage('${imageUrl}', '${downloadName}')">Descargar</button>` : ''}
+        ${downloadName ? `<button class="download-btn" onclick="downloadImage('${imageUrl}', '${downloadName}')">Download</button>` : ''}
     `;
-    
     return card;
 }
 
@@ -339,30 +898,165 @@ window.downloadImage = function(url, filename) {
     document.body.removeChild(link);
 };
 
+async function extractVideoFrames(videoFile) {
+    return new Promise((resolve, reject) => {
+        const video = document.createElement('video');
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const frames = [];
+
+        video.addEventListener('loadedmetadata', () => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            video.currentTime = 0;
+        });
+
+        video.addEventListener('seeked', () => {
+            ctx.drawImage(video, 0, 0);
+            frames.push(canvas.toDataURL());
+            if (video.currentTime < video.duration - 0.1) {
+                video.currentTime += 0.1;
+            } else {
+                resolve(frames);
+            }
+        });
+
+        video.addEventListener('error', reject);
+        video.src = URL.createObjectURL(videoFile);
+    });
+}
+
+async function processVideoFrames() {
+    if (!currentFile || !currentFile.type.startsWith('video/')) return;
+
+    loadingIndicator.classList.remove('hidden');
+    progressInfo.textContent = 'Extracting frames from video...';
+    processVideoBtn.disabled = true;
+
+    try {
+        videoFrames = await extractVideoFrames(currentFile);
+        progressInfo.textContent = `${videoFrames.length} frames extracted. Processing backgrounds...`;
+        
+        processedFrames = [];
+        const baseName = prompt('Base name for files:', 'frame') || 'frame';
+
+        for (let i = 0; i < videoFrames.length; i++) {
+            progressInfo.textContent = `Processing frame ${i + 1} of ${videoFrames.length}...`;
+            
+            const response = await fetch(videoFrames[i]);
+            const blob = await response.blob();
+            const processedBlob = await removeBackground(blob);
+            const processedUrl = URL.createObjectURL(processedBlob);
+            
+            processedFrames.push({
+                url: processedUrl,
+                name: `${baseName}_${String(i + 1).padStart(4, '0')}.png`
+            });
+        }
+
+        displayProcessedFrames();
+        downloadZipBtn.disabled = false;
+        progressInfo.textContent = `${processedFrames.length} frames processed successfully`;
+        
+    } catch (error) {
+        console.error('Error processing video:', error);
+        progressInfo.textContent = 'Error processing video';
+    } finally {
+        loadingIndicator.classList.add('hidden');
+        processVideoBtn.disabled = false;
+    }
+}
+
+function displayProcessedFrames() {
+    resultsContainer.innerHTML = '';
+    const header = document.createElement('div');
+    header.className = 'image-container';
+    header.innerHTML = `
+        <h2>Processed Frames (${processedFrames.length})</h2>
+        <div class="image-info">Background removed from all frames</div>
+    `;
+    resultsContainer.appendChild(header);
+
+    const grid = document.createElement('div');
+    grid.className = 'frames-preview';
+    processedFrames.slice(0, 20).forEach((frame, index) => {
+        const frameElement = document.createElement('div');
+        frameElement.className = 'frame-item result-bg';
+        frameElement.innerHTML = `
+            <img src="${frame.url}" alt="Frame ${index + 1}">
+            <div class="frame-number">Frame ${index + 1}</div>
+        `;
+        grid.appendChild(frameElement);
+    });
+
+    if (processedFrames.length > 20) {
+        const moreInfo = document.createElement('div');
+        moreInfo.className = 'more-frames';
+        moreInfo.textContent = `... and ${processedFrames.length - 20} more frames`;
+        grid.appendChild(moreInfo);
+    }
+
+    resultsContainer.appendChild(grid);
+}
+
+async function downloadAsZip() {
+    const filesToDownload = processedFrames.length > 0 ? processedFrames : processedFolderFiles;
+    if (filesToDownload.length === 0) return;
+
+    loadingIndicator.classList.remove('hidden');
+    progressInfo.textContent = 'Creating ZIP file...';
+
+    try {
+        const zip = new JSZip();
+        for (const file of filesToDownload) {
+            if (file.url) {
+                const response = await fetch(file.url);
+                const blob = await response.blob();
+                zip.file(file.name, blob);
+            }
+        }
+
+        const zipBlob = await zip.generateAsync({type: 'blob'});
+        const zipUrl = URL.createObjectURL(zipBlob);
+        const link = document.createElement('a');
+        link.href = zipUrl;
+        link.download = 'processed_images.zip';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        progressInfo.textContent = 'ZIP file downloaded successfully';
+        
+    } catch (error) {
+        console.error('Error creating ZIP:', error);
+        progressInfo.textContent = 'Error creating ZIP file';
+    } finally {
+        loadingIndicator.classList.add('hidden');
+    }
+}
+
 async function removeBackgroundAction() {
     if (!currentFile) return;
-    
+
     loadingIndicator.classList.remove('hidden');
-    progressInfo.textContent = 'Delete background...';
+    progressInfo.textContent = 'Removing background...';
     removeBgBtn.disabled = true;
-    
+
     try {
         const blob = await removeBackground(currentFile, {
             progress: (key, current, total) => {
                 const percentage = Math.round((current / total) * 100);
-                progressInfo.textContent = `Download${key}: ${percentage}%`;
+                progressInfo.textContent = `Downloading ${key}: ${percentage}%`;
             }
         });
-        
+
         const url = URL.createObjectURL(blob);
         currentImages.noBackground = url;
-        
-        const card = createImageCard('Sin Fondo', url, 'background delete ', 'imagen_sin_fondo.png');
+        const card = createImageCard('No Background', url, 'Background removed', 'image_no_background.png');
         resultsContainer.appendChild(card);
+        progressInfo.textContent = 'Background removed successfully';
         
-        progressInfo.textContent = 'Fund successfully removed';
     } catch (error) {
-        console.error('Error al eliminar fondo:', error);
+        console.error('Error removing background:', error);
         progressInfo.textContent = 'Error removing background';
     } finally {
         loadingIndicator.classList.add('hidden');
@@ -372,8 +1066,8 @@ async function removeBackgroundAction() {
 
 async function upscaleImageAction() {
     if (!currentFile) return;
-    
-    const scale = parseInt(scaleFactor.value);
+
+    const scale = parseInt(scaleFactor.value) || 2;
     const img = new Image();
     
     img.onload = async function() {
@@ -383,84 +1077,41 @@ async function upscaleImageAction() {
         if (projectedSize > 4096) {
             const maxScale = Math.floor(4096 / maxDimension);
             if (maxScale < 2) {
-                progressInfo.textContent = 'Imagen demasiado grande. Máximo permitido: 2048x2048px';
+                progressInfo.textContent = 'Image too large. Maximum allowed: 2048x2048px';
                 return;
             }
-            progressInfo.textContent = `Escala reducida a ${maxScale}x para evitar límites de WebGL`;
+            progressInfo.textContent = `Scale reduced to ${maxScale}x to avoid WebGL limits`;
             scaleFactor.value = maxScale.toString();
         }
-        
+
         loadingIndicator.classList.remove('hidden');
-        progressInfo.textContent = 'Aumentando resolución...';
+        progressInfo.textContent = 'Upscaling image...';
         upscaleBtn.disabled = true;
-        
+
         try {
             if (!upscaler) {
-                progressInfo.textContent = 'Inicializando modelo...';
+                progressInfo.textContent = 'Initializing model...';
                 await initUpscaler();
             }
-            
-            const result = await upscaler.upscale(img, {
-                patchSize: 64,
-                padding: 2
-            });
-            
-            let canvas;
-            let url;
-            
-            if (result instanceof HTMLCanvasElement) {
-                canvas = result;
-                url = canvas.toDataURL();
-            } else if (result && typeof result === 'object' && result.data) {
-                canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                canvas.width = this.width * scale;
-                canvas.height = this.height * scale;
-                
-                const imageData = ctx.createImageData(canvas.width, canvas.height);
-                imageData.data.set(result.data);
-                ctx.putImageData(imageData, 0, 0);
-                
-                url = canvas.toDataURL();
-            } else if (result instanceof ImageData) {
-                canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                canvas.width = result.width;
-                canvas.height = result.height;
-                ctx.putImageData(result, 0, 0);
-                
-                url = canvas.toDataURL();
-            } else {
-                canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                canvas.width = this.width * scale;
-                canvas.height = this.height * scale;
-                ctx.drawImage(this, 0, 0, canvas.width, canvas.height);
-                
-                url = canvas.toDataURL();
-            }
-            
+
+            const canvas = await safeUpscale(img);
+            const url = canvas.toDataURL('image/png');
+
             currentImages.upscaled = url;
-            
             const originalSize = `${this.width} x ${this.height} px`;
             const newSize = `${canvas.width} x ${canvas.height} px`;
-            
             const card = createImageCard(
-                'Resolución Aumentada',
+                'Upscaled Image',
                 url,
                 `${originalSize} → ${newSize}`,
-                'imagen_upscaled.png'
+                'image_upscaled.png'
             );
             resultsContainer.appendChild(card);
+            progressInfo.textContent = 'Image upscaled successfully';
             
-            progressInfo.textContent = 'Resolución aumentada exitosamente';
         } catch (error) {
-            console.error('Error en upscaling:', error);
-            if (error.message.includes('texture size') || error.message.includes('WebGL maximum')) {
-                progressInfo.textContent = 'Imagen demasiado grande para el GPU. Intenta con escala menor.';
-            } else {
-                progressInfo.textContent = 'Error al aumentar resolución';
-            }
+            console.error('Error upscaling:', error);
+            progressInfo.textContent = 'Error upscaling image';
         } finally {
             loadingIndicator.classList.add('hidden');
             upscaleBtn.disabled = false;
@@ -472,14 +1123,23 @@ async function upscaleImageAction() {
 
 window.addEventListener('beforeunload', () => {
     Object.values(currentImages).forEach(url => {
-        if (url.startsWith('blob:')) {
+        if (url && url.startsWith('blob:')) {
             URL.revokeObjectURL(url);
         }
     });
+    
+    processedFrames.forEach(frame => {
+        if (frame.url && frame.url.startsWith('blob:')) {
+            URL.revokeObjectURL(frame.url);
+        }
+    });
+    
+    processedFolderFiles.forEach(file => {
+        if (file.url && file.url.startsWith('blob:')) {
+            URL.revokeObjectURL(file.url);
+        }
+    });
 });
-
-
-      
     </script>
 </body>
 </html>
